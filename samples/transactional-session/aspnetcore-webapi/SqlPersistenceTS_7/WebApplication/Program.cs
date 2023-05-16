@@ -1,20 +1,25 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using System;
+using System.IO;
+using Microsoft.Data.SqlClient;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using NServiceBus;
 using NServiceBus.Persistence.Sql;
 using NServiceBus.TransactionalSession;
 
 public class Program
-{    
+{
     // for SqlExpress use Data Source=.\SqlExpress;Initial Catalog=nservicebus;Integrated Security=True;Encrypt=false
-    const string ConnectionString = @"Server=localhost,1433;Initial Catalog=nservicebus;User Id=SA;Password=yourStrong(!)Password;Encrypt=false";
+    public const string ConnectionString = @"Server=localhost,1433;Initial Catalog=nservicebus;User Id=SA;Password=yourStrong(!)Password;Encrypt=false;Connection Lifetime=80;";
+    // public const string ConnectionString = @"Server=tcp:XYZ,3342;Persist Security Info=False;User ID=XYZ;Password=XYZ;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
 
     public static void Main()
     {
+        using var listener = new EventCounterListener();
         using (var myDataContext = new MyDataContext(new DbContextOptionsBuilder<MyDataContext>()
                    .UseSqlServer(new SqlConnection(ConnectionString))
                    .Options))
@@ -27,8 +32,21 @@ public class Program
             #region txsession-nsb-configuration
             .UseNServiceBus(context =>
             {
+                var directory = Path.Join(AppDomain.CurrentDomain.BaseDirectory, ".learningtransport");
+                if (Directory.Exists(directory))
+                {
+                    Directory.Delete(directory, true);
+                }
+
                 var endpointConfiguration = new EndpointConfiguration("Samples.ASPNETCore.Sender");
-                var transport = endpointConfiguration.UseTransport(new LearningTransport { TransportTransactionMode = TransportTransactionMode.ReceiveOnly });
+                // var transportDefinition = new LearningTransport
+                // {
+                //     TransportTransactionMode = TransportTransactionMode.ReceiveOnly,
+                //     StorageDirectory = directory
+                // };
+                var transport = endpointConfiguration.UseTransport<LearningTransport>();
+                transport.Transactions(TransportTransactionMode.ReceiveOnly);
+                transport.StorageDirectory(directory);
                 endpointConfiguration.EnableInstallers();
 
                 var persistence = endpointConfiguration.UsePersistence<SqlPersistence>();
@@ -58,11 +76,20 @@ public class Program
                     context.Database.UseTransaction(session.Transaction);
 
                     //Ensure context is flushed before the transaction is committed
-                    session.OnSaveChanges((s, token) => context.SaveChangesAsync(token));
+                    // session.OnSaveChanges((s, token) => context.SaveChangesAsync(token));
+                    session.OnSaveChanges((s) => context.SaveChangesAsync());
 
                     return context;
                 });
             })
+
+            // .ConfigureServices(c =>
+            // {
+            //     c.AddDbContext<MyDataContext>(o =>
+            //     {
+            //         o.UseSqlServer(ConnectionString);
+            //     });
+            // })
             #endregion
 
             .ConfigureWebHostDefaults(c =>
@@ -73,8 +100,17 @@ public class Program
                     #region txsession-web-configuration
                     app.UseMiddleware<MessageSessionMiddleware>();
                     #endregion
+
+                    // app.UseMiddleware<EfMiddleware>();
                     app.UseRouting();
                     app.UseEndpoints(r => r.MapControllers());
+                });
+                c.ConfigureLogging(l =>
+                {
+                    l.AddFilter("Microsoft", LogLevel.Warning)
+                        .AddFilter("System", LogLevel.Warning)
+                        .AddFilter("NToastNotify", LogLevel.Warning)
+                        .AddConsole();
                 });
             })
             .Build();
