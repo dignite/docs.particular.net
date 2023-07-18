@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33516.290
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NSBLambdaAspNetCoreApi", "NSBLambdaAspNetCoreApi.csproj", "{86019507-ECED-415F-8740-FF3858F62615}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AwsLambda.Messages", "..\AwsLambda.Messages\AwsLambda.Messages.csproj", "{0EE2C04E-39D9-4C4D-B50F-F15581746A53}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{86019507-ECED-415F-8740-FF3858F62615}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{86019507-ECED-415F-8740-FF3858F62615}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{86019507-ECED-415F-8740-FF3858F62615}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{86019507-ECED-415F-8740-FF3858F62615}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0EE2C04E-39D9-4C4D-B50F-F15581746A53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0EE2C04E-39D9-4C4D-B50F-F15581746A53}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0EE2C04E-39D9-4C4D-B50F-F15581746A53}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0EE2C04E-39D9-4C4D-B50F-F15581746A53}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {78E956C6-17B7-4875-9410-0E04215C60E0}
+	EndGlobalSection
+EndGlobal
