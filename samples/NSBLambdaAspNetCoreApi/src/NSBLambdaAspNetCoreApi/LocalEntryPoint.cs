@@ -25,16 +25,16 @@ public class LocalEntryPoint
 
     public static IHostBuilder CreateHostBuilder(string[] args) =>
         Host.CreateDefaultBuilder(args)
-            .UseNServiceBus(hostBuilderContext  =>
-            {
-                var endpointConfiguration = new NServiceBus.EndpointConfiguration("AwsLambda.Sender");
-                endpointConfiguration.SendFailedMessagesTo("ErrorAwsLambdaSQSTrigger");
-                endpointConfiguration.UseSerialization<NewtonsoftJsonSerializer>();
-                endpointConfiguration.UseTransport<SqsTransport>();
+            //.UseNServiceBus(hostBuilderContext  =>
+            //{
+            //    var endpointConfiguration = new NServiceBus.EndpointConfiguration("AwsLambda.Sender");
+            //    endpointConfiguration.SendFailedMessagesTo("ErrorAwsLambdaSQSTrigger");
+            //    endpointConfiguration.UseSerialization<NewtonsoftJsonSerializer>();
+            //    endpointConfiguration.UseTransport<SqsTransport>();
 
-                //await Endpoint.Start(endpointConfiguration).ConfigureAwait(false);
-                return endpointConfiguration;
-            })
+            //    //await Endpoint.Start(endpointConfiguration).ConfigureAwait(false);
+            //    return endpointConfiguration;
+            //})
             .ConfigureWebHostDefaults(webBuilder =>
             {
                 webBuilder.UseStartup<Startup>();

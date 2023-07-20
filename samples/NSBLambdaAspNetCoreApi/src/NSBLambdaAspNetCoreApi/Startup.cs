@@ -1,4 +1,7 @@
-﻿namespace NSBLambdaAspNetCoreApi;
+﻿using Microsoft.AspNetCore.Diagnostics;
+using static System.Net.Mime.MediaTypeNames;
+
+namespace NSBLambdaAspNetCoreApi;
 
 public class Startup
 {
@@ -18,10 +21,37 @@ public class Startup
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
-        if (env.IsDevelopment())
+
+        app.UseExceptionHandler(exceptionHandlerApp =>
         {
-            app.UseDeveloperExceptionPage();
-        }
+            exceptionHandlerApp.Run(async context =>
+            {
+                context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+
+                // using static System.Net.Mime.MediaTypeNames;
+                context.Response.ContentType = Text.Plain;
+
+                await context.Response.WriteAsync($"An exception was thrown. Exception:TN and CQ");
+
+                var exceptionHandlerPathFeature =
+                    context.Features.Get<IExceptionHandlerPathFeature>();
+
+                if (exceptionHandlerPathFeature?.Error is FileNotFoundException)
+                {
+                    await context.Response.WriteAsync(" The file was not found.");
+                }
+
+                if (exceptionHandlerPathFeature?.Path == "/")
+                {
+                    await context.Response.WriteAsync(" Page: Home.");
+                }
+            });
+        });
+
+        //if (env.IsDevelopment())
+        //{
+        app.UseDeveloperExceptionPage();
+        //}
 
         app.UseHttpsRedirection();
 
@@ -37,5 +67,8 @@ public class Startup
                 await context.Response.WriteAsync("Welcome to running ASP.NET Core on AWS Lambda");
             });
         });
+
+
+        
     }
 }

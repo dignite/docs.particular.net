@@ -1,3 +1,7 @@
+using Amazon.CloudWatchLogs.Model;
+using Amazon.CloudWatchLogs;
+using NServiceBus;
+
 namespace NSBLambdaAspNetCoreApi;
 
 /// <summary>
@@ -28,8 +32,9 @@ public class LambdaEntryPoint :
     /// <param name="builder"></param>
     protected override void Init(IWebHostBuilder builder)
     {
-        builder
+        var app = builder
             .UseStartup<Startup>();
+
     }
 
     /// <summary>
@@ -41,5 +46,15 @@ public class LambdaEntryPoint :
     /// <param name="builder"></param>
     protected override void Init(IHostBuilder builder)
     {
+        builder.UseNServiceBus(hostBuilderContext =>
+        {
+            var endpointConfiguration = new NServiceBus.EndpointConfiguration("AwsLambda.Sender");
+            endpointConfiguration.SendFailedMessagesTo("ErrorAwsLambdaSQSTrigger");
+            endpointConfiguration.UseSerialization<NewtonsoftJsonSerializer>();
+            endpointConfiguration.UseTransport<SqsTransport>();
+
+            //await Endpoint.Start(endpointConfiguration).ConfigureAwait(false);
+            return endpointConfiguration;
+        });
     }
 }
