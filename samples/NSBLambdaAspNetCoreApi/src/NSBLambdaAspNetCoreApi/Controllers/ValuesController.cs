@@ -8,10 +8,12 @@ namespace NSBLambdaAspNetCoreApi.Controllers;
 public class ValuesController : ControllerBase
 {
     public IMessageSession MessageSession { get; }
+    readonly ILogger log;
 
-    public ValuesController(IMessageSession messageSession)
+    public ValuesController(IMessageSession messageSession, ILogger<ValuesController> log)
     {
         MessageSession = messageSession;
+        this.log = log; 
     }
 
     // static ValuesController()
@@ -28,6 +30,7 @@ public class ValuesController : ControllerBase
     [HttpGet]
     public IEnumerable<string> Get()
     {
+        log.LogError("This is a boom error!!!");
         throw new NotImplementedException("BOOM!!!");
         //return new string[] { "value1", "value2" };
     }
@@ -46,7 +49,8 @@ public class ValuesController : ControllerBase
 
         await MessageSession.Send("AwsLambdaSQSTrigger", new TriggerMessage() { Payload = id.ToString() })
             .ConfigureAwait(false);
-            return id.ToString();
+        log.LogInformation("A message was sent to AwsLambdaSQSTrigger with the payload of: " + id.ToString());
+        return id.ToString();
     }
 
     // POST api/values

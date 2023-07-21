@@ -1,5 +1,6 @@
 using Amazon.CloudWatchLogs.Model;
 using Amazon.CloudWatchLogs;
+using AWS.Logger.AspNetCore;
 using NServiceBus;
 
 namespace NSBLambdaAspNetCoreApi;
@@ -32,9 +33,16 @@ public class LambdaEntryPoint :
     /// <param name="builder"></param>
     protected override void Init(IWebHostBuilder builder)
     {
-        var app = builder
+        builder
+            .ConfigureServices(services =>
+            {
+                services.AddTransient<ILogger>(s => s.GetRequiredService<ILogger<Startup>>());
+            })
+            .ConfigureLogging(log =>
+            {
+                log.AddAWSProvider();
+            })
             .UseStartup<Startup>();
-
     }
 
     /// <summary>
@@ -46,15 +54,24 @@ public class LambdaEntryPoint :
     /// <param name="builder"></param>
     protected override void Init(IHostBuilder builder)
     {
-        builder.UseNServiceBus(hostBuilderContext =>
-        {
-            var endpointConfiguration = new NServiceBus.EndpointConfiguration("AwsLambda.Sender");
-            endpointConfiguration.SendFailedMessagesTo("ErrorAwsLambdaSQSTrigger");
-            endpointConfiguration.UseSerialization<NewtonsoftJsonSerializer>();
-            endpointConfiguration.UseTransport<SqsTransport>();
+        builder
+            .UseNServiceBus(hostBuilderContext =>
+            {
+                var endpointConfiguration = new EndpointConfiguration("AwsLambda.Sender");
+                endpointConfiguration.SendFailedMessagesTo("ErrorAwsLambdaSQSTrigger");
+                endpointConfiguration.UseSerialization<NewtonsoftJsonSerializer>();
+                endpointConfiguration.UseTransport<SqsTransport>();
 
-            //await Endpoint.Start(endpointConfiguration).ConfigureAwait(false);
-            return endpointConfiguration;
-        });
+                //await Endpoint.Start(endpointConfiguration).ConfigureAwait(false);
+                return endpointConfiguration;
+            })
+            .ConfigureServices(services =>
+            {
+                services.AddTransient<ILogger>(s => s.GetRequiredService<ILogger<Startup>>());
+            })
+            .ConfigureLogging(log =>
+            {
+                log.AddAWSProvider();
+            });
     }
 }

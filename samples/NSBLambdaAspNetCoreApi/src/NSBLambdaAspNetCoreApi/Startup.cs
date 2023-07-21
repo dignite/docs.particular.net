@@ -22,35 +22,9 @@ public class Startup
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
 
-        app.UseExceptionHandler(exceptionHandlerApp =>
-        {
-            exceptionHandlerApp.Run(async context =>
-            {
-                context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-
-                // using static System.Net.Mime.MediaTypeNames;
-                context.Response.ContentType = Text.Plain;
-
-                await context.Response.WriteAsync($"An exception was thrown. Exception:TN and CQ");
-
-                var exceptionHandlerPathFeature =
-                    context.Features.Get<IExceptionHandlerPathFeature>();
-
-                if (exceptionHandlerPathFeature?.Error is FileNotFoundException)
-                {
-                    await context.Response.WriteAsync(" The file was not found.");
-                }
-
-                if (exceptionHandlerPathFeature?.Path == "/")
-                {
-                    await context.Response.WriteAsync(" Page: Home.");
-                }
-            });
-        });
-
         //if (env.IsDevelopment())
         //{
-        app.UseDeveloperExceptionPage();
+            app.UseDeveloperExceptionPage();
         //}
 
         app.UseHttpsRedirection();
