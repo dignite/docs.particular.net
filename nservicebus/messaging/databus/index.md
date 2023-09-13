@@ -21,9 +21,9 @@ If the location is not available upon sending, the send operation will fail. Whe
 
 ## Transport message size limits
 
-Using the Data Bus is required when the message size can exceed the transport message size limit.
+The data bus should be used when it expected that message size may exceed the message size limit for the transport being used.
 
-Note: Not all transports have very restrictive message size limits and Azure Service Bus has increased its size limits over the years. Check the respective transport website documentation for the latest maximum limit of the message size.
+Note: Not all transports have message size limits and Azure Service Bus has increased its limit over time. The documentation for each transport should be checked for the latest message size limit.
 
 | Transport                  | Maximum size |
 | -------------------------- | ------------:|
@@ -57,7 +57,7 @@ There are two ways to specify the message properties to be sent using the data b
  1. Using the `DataBusProperty<T>` type
  1. Message conventions
 
-Note: Data bus properties must be top-level properties on the message class.
+Note: Data bus properties must be top-level properties on a message class.
 
 ### Using `DataBusProperty<T>`
 
@@ -67,7 +67,7 @@ snippet: MessageWithLargePayload
 
 ### Using message conventions
 
-NServiceBus also supports defining data bus properties via a convention. This allows data properties to be sent using the data bus without using `DataBusProperty<T>`, thus removing the need for having a dependency on NServiceBus from the message types.
+NServiceBus also supports defining data bus properties by convention. This allows data properties to be sent using the data bus without using `DataBusProperty<T>`, thus removing the need for having a dependency on NServiceBus from the message types.
 
 In the configuration of the endpoint include:
 
@@ -95,16 +95,17 @@ Automatically removing these attachments can cause problems in many situations. 
 
 ## Alternatives
 
-- Use a different transport or a different transport tier
-- Message Compression: Use message body compression which works well on text-based payloads like XML and Json or any payload (text or binary) that contains repetitive data
-  - [Message mutator example demonstrating message body compression](/samples/messagemutators/)
-- Stream-based properties: The [Handling large stream properties via pipeline](/samples/pipeline/stream-properties/) sample demonstrates a purely stream-based approach (rather than loading the full payload into memory) implemented by leveraging the NServiceBus pipeline.
-- Binary Serializer: A binary serializer is more efficient and most serializers can be added with a few lines of code
-   - Some binary [serializers are maintained by the community](/nservicebus/community/#serializers)
-- Attachments: When dealing with unbounded binary payloads consider the [community maintained NServiceBus.Attachments](/nservicebus/community/#nservicebus-attachments)
-  - Read on demand: Will only retrieve attachment data when the consumer reads it
-  - Reduced Memory usage: No base64 serializer overhead resulting in a significant reduction in resource utilization
-- Use any of the above in combination with compression
+NOTE: A combination of these techniques may be used.
+
+- Use a different transport or different tier (e.g. Azure Service Bus _Premium_ instead of _Standard_).
+- Message compression: this works well on text-based payloads like XML and JSON, or any payload (text or binary) that contains repetitive data.
+  - See the [message mutator example demonstrating message body compression](/samples/messagemutators/).
+- Stream-based properties: The sample showing [handling large stream properties via pipeline](/samples/pipeline/stream-properties/) demonstrates a purely stream-based approach (rather than loading the full payload into memory) using the NServiceBus pipeline.
+- A more efficient serializer: For example, a binary serializer. Most serializers can be added with a few lines of code.
+   - Several [serializers are maintained by the community](/nservicebus/community/#serializers).
+- Attachments: the community maintained [NServiceBus.Attachments](/nservicebus/community/#nservicebus-attachments) package may be used for unbounded binary payloads.
+  - Read on demand: attachments are only retrieved when read by a consumer.
+  - Reduced memory usage: the package avoids the use of a base64 serializer which results in a significant reduction in memory usage.
 
 ## Other considerations
 
